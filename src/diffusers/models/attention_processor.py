@@ -2735,10 +2735,11 @@ class AttnProcessor2_0:
                 is_causal=False, scale=None, enable_gqa=False) -> torch.Tensor:
             L, S = query.size(-2), key.size(-2)
             scale_factor = 1 / math.sqrt(query.size(-1)) if scale is None else scale
-            attn_bias = torch.zeros(L, S, dtype=query.dtype)
+            # TODO: device is manually set
+            attn_bias = torch.zeros(L, S, dtype=query.dtype, device=torch.device('cuda'))
             if is_causal:
                 assert attn_mask is None
-                temp_mask = torch.ones(L, S, dtype=torch.bool).tril(diagonal=0)
+                temp_mask = torch.ones(L, S, dtype=torch.bool, device=torch.device('cuda')).tril(diagonal=0)
                 attn_bias.masked_fill_(temp_mask.logical_not(), float("-inf"))
                 attn_bias.to(query.dtype)
 
