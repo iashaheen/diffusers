@@ -61,7 +61,7 @@ class GatedSelfAttentionDense(nn.Module):
         # we need a linear projection since we need cat visual feature and obj feature
         self.linear = nn.Linear(context_dim, query_dim)
 
-        self.attn = Attention(query_dim=query_dim, heads=n_heads, dim_head=d_head)
+        self.attn, _ = Attention(query_dim=query_dim, heads=n_heads, dim_head=d_head)
         self.ff = FeedForward(query_dim, activation_fn="geglu")
 
         self.norm1 = nn.LayerNorm(query_dim)
@@ -138,7 +138,7 @@ class JointTransformerBlock(nn.Module):
                 "The current PyTorch version does not support the `scaled_dot_product_attention` function."
             )
 
-        self.attn = Attention(
+        self.attn, _ = Attention(
             query_dim=dim,
             cross_attention_dim=None,
             added_kv_proj_dim=dim,
@@ -153,7 +153,7 @@ class JointTransformerBlock(nn.Module):
         )
 
         if use_dual_attention:
-            self.attn2 = Attention(
+            self.attn2, _ = Attention(
                 query_dim=dim,
                 cross_attention_dim=None,
                 dim_head=attention_head_dim,
@@ -370,7 +370,7 @@ class BasicTransformerBlock(nn.Module):
         else:
             self.norm1 = nn.LayerNorm(dim, elementwise_affine=norm_elementwise_affine, eps=norm_eps)
 
-        self.attn1 = Attention(
+        self.attn1, _ = Attention(
             query_dim=dim,
             heads=num_attention_heads,
             dim_head=attention_head_dim,
@@ -400,7 +400,7 @@ class BasicTransformerBlock(nn.Module):
             else:
                 self.norm2 = nn.LayerNorm(dim, norm_eps, norm_elementwise_affine)
 
-            self.attn2 = Attention(
+            self.attn2, _ = Attention(
                 query_dim=dim,
                 cross_attention_dim=cross_attention_dim if not double_self_attention else None,
                 heads=num_attention_heads,
@@ -667,7 +667,7 @@ class TemporalBasicTransformerBlock(nn.Module):
         )
 
         self.norm1 = nn.LayerNorm(time_mix_inner_dim)
-        self.attn1 = Attention(
+        self.attn1, _ = Attention(
             query_dim=time_mix_inner_dim,
             heads=num_attention_heads,
             dim_head=attention_head_dim,
@@ -680,7 +680,7 @@ class TemporalBasicTransformerBlock(nn.Module):
             # I.e. the number of returned modulation chunks from AdaLayerZero would not make sense if returned during
             # the second cross attention block.
             self.norm2 = nn.LayerNorm(time_mix_inner_dim)
-            self.attn2 = Attention(
+            self.attn2, _ = Attention(
                 query_dim=time_mix_inner_dim,
                 cross_attention_dim=cross_attention_dim,
                 heads=num_attention_heads,
@@ -783,7 +783,7 @@ class SkipFFTransformerBlock(nn.Module):
 
         self.norm1 = RMSNorm(dim, 1e-06)
 
-        self.attn1 = Attention(
+        self.attn1, _ = Attention(
             query_dim=dim,
             heads=num_attention_heads,
             dim_head=attention_head_dim,
@@ -795,7 +795,7 @@ class SkipFFTransformerBlock(nn.Module):
 
         self.norm2 = RMSNorm(dim, 1e-06)
 
-        self.attn2 = Attention(
+        self.attn2, _ = Attention(
             query_dim=dim,
             cross_attention_dim=cross_attention_dim,
             heads=num_attention_heads,
@@ -962,7 +962,7 @@ class FreeNoiseTransformerBlock(nn.Module):
         # 1. Self-Attn
         self.norm1 = nn.LayerNorm(dim, elementwise_affine=norm_elementwise_affine, eps=norm_eps)
 
-        self.attn1 = Attention(
+        self.attn1, _ = Attention(
             query_dim=dim,
             heads=num_attention_heads,
             dim_head=attention_head_dim,
@@ -977,7 +977,7 @@ class FreeNoiseTransformerBlock(nn.Module):
         if cross_attention_dim is not None or double_self_attention:
             self.norm2 = nn.LayerNorm(dim, norm_eps, norm_elementwise_affine)
 
-            self.attn2 = Attention(
+            self.attn2, _ = Attention(
                 query_dim=dim,
                 cross_attention_dim=cross_attention_dim if not double_self_attention else None,
                 heads=num_attention_heads,
